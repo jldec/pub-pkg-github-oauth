@@ -17,7 +17,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/jldec/pub-serve-sessions.git"
+    "url": "git://github.com/jldec/pub-pkg-github-oauth.git"
   },
   "author": "jurgen leschner",
   "license": "MIT"

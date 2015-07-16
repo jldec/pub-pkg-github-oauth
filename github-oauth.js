@@ -1,5 +1,5 @@
 /**
- * github-auth.js
+ * pub-pkg github-oauth.js
  *
  * copyright 2015, Jurgen Leschner - github.com/jldec - MIT license
 **/
@@ -22,7 +22,9 @@ module.exports = function githubOAuth(server) {
 
   var url  = opts.url || process.env.GHU || '/server/auth/github';
 
-  require('assert')(process.env.GHID && process.env.GHCS);
+  require('assert')(process.env.GHID && process.env.GHCS,
+    'pub-pkg-github-oauth missing environment variables: GHID and GHCS');
+
   debug('guthub-oauth client ID: ' + process.env.GHID);
 
   // start here to establish session - auto-redirects to github oauth login
