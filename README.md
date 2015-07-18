@@ -6,15 +6,15 @@ It is used by [pub-gatekeeper](https://github.com/jldec/pub-gatekeeper) to media
 
 ### flow
 
-1. Browsers start by visiting `/server/auth/github?ref={fully-qualified url}`. This initiates a session with the pub-gatekeeper server. The `ref` parameter specifies where to return the browser after authentication.
+1. Browsers start by checking for an existing oauth access token at `/server/auth/github/status` using JSONP or similar mechanism. The first time they do this, it initiates a session with the pub-gatekeeper server, and the server returns a JSON object with no access_token.
 
-2. Browsers are immediately redirected from the gatekeeper to github's oauth page at https://github.com/login/oauth/authorize. The first time this happens, users will be asked to login, and confirm the scope of the auth request.
+2. To start a new authentication process, browsers should then navigate to `/server/auth/github?ref={fully-qualified url}`. The `ref` parameter specifies where to direct the browser after authentication. The server will immediately redirect to github's oauth page at https://github.com/login/oauth/authorize. New users will be asked to login, and confirm the scope of the auth request.
 
-3. After the user confirms access, github will redirect back to the gatekeeper server at `server/auth/github/callback`. This triggers the 2nd step in the authentication process, in which the server requests a user-specific access token from github.
+3. After the user has confirmed oauth access, github will redirect back to the gatekeeper server at `server/auth/github/callback`. This triggers the 2nd step in the authentication process, in which the server requests a user-specific access token from github.
 
 4. When the response with the access token comes back, the gatekeeper stores this in the browser's session, and then redirects back to the `ref` parameter location from step 1.
 
-5. Javascript running in the browser can then GET the access token at `/server/auth/github/status` using the session established earlier. This token opens the door to perform commits or reads on the user's repo on github.
+5. Step 1 is repeated, but this time, the request returns an access token (using the session established earlier). This token opens the door to perform commits or reads on the user's repo on github.
 
 ## api
 

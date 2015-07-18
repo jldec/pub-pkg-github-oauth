@@ -31,6 +31,7 @@ module.exports = function githubOAuth(server) {
 
   debug('guthub-oauth client ID: ' + process.env.GHID);
 
+
   // start here to establish session - auto-redirects to github oauth login
   // ref parameter = qualified url to redirect to after auth, defaults to referrer
   app.get(url, function(req, res) {
@@ -42,6 +43,7 @@ module.exports = function githubOAuth(server) {
     res.redirect('https://github.com/login/oauth/authorize' +
       '?client_id=' + process.env.GHID + '&scope=repo,user:email');
   });
+
 
   // github should be configured to redirect here after oauth login
   // calls github api to turn temporary code into access token
@@ -60,10 +62,12 @@ module.exports = function githubOAuth(server) {
     });
   });
 
+
   // retrieve auth result stored in session
   app.get(url + '/status', function(req, res) {
-    res.send(req.session && req.session.github && req.session.github.auth);
+    res.send((req.session && req.session.github && req.session.github.auth) || {});
   });
+
 
   // get access token from github
   function authenticate(req, cb) {
