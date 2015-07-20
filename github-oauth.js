@@ -15,7 +15,7 @@ module.exports = function githubOAuth(server) {
   var self = this;
 
   var app  = server.app;
-
+  var log  = server.opts.log;
   var opts = server.opts.github || {};
 
   var request = require('request')
@@ -36,9 +36,17 @@ module.exports = function githubOAuth(server) {
   // ref parameter = qualified url to redirect to after auth, defaults to referrer
   app.get(url, function(req, res) {
     if (req.session) {
-      req.session.github = req.session.github || {};
-      var ref = req.query.ref || req.get('Referer');
-      if (ref) { req.session.github.ref = ref };
+      var gh = req.session.github = req.session.github || {};
+      var ref = (req.query.ref || req.get('Referer') || '').replace(/\?.*/, '');
+      if (ref) {
+        gh.ref = ref
+        if (gh.auth) {
+          debug('session already authenticated: ' + gh.auth.user);
+          gh.statusCnt = 0;
+          gh.ts = Date.now();
+          return res.redirect(ref + '?code=' + u.uqt(req.sessionID));
+        }
+      };
     }
     res.redirect('https://github.com/login/oauth/authorize' +
       '?client_id=' + process.env.GHID + '&scope=repo,user:email');
@@ -48,14 +56,16 @@ module.exports = function githubOAuth(server) {
   // github should be configured to redirect here after oauth login
   // calls github api to turn temporary code into access token
   app.get(url + '/callback', function(req, res) {
-    debug('code: ' + req.query.code);
     authenticate(req, function(err, result) {
-      debug(err || result);
       if (req.session) {
         var gh = req.session.github;
         if (gh) {
+          log('github-oauth %s %s', result.user, gh.ref);
           gh.auth = err || result;
-          if (gh.ref) return res.redirect(gh.ref);
+          gh.ua = req.get('user-agent'); // use to prevent snooping
+          gh.statusCnt = 0;
+          gh.ts = Date.now();
+          if (gh.ref) return res.redirect(gh.ref + '?code=' + u.uqt(req.sessionID));
         }
       }
       res.send(err || result); // no ref/referrer/session -> return result
@@ -65,8 +75,24 @@ module.exports = function githubOAuth(server) {
 
   // retrieve auth result stored in session
   app.get(url + '/status', function(req, res) {
-    res.send((req.session && req.session.github && req.session.github.auth) || {});
-  });
+
+    // first time request returns empty object
+    if (!req.sessionStore || !req.query.code) return res.send({});
+
+    // after auth, use code parameter to lookup session in sessionStore
+    req.sessionStore.get(req.query.code, function(err, session) {
+      var gh = session && session.github;
+      if (!gh || gh.statusCnt || gh.ua !== req.get('user-agent') || !gh.auth ||
+       (opts.expire && (Date.now() - gh.ts > ms(opts.expire)))) {
+        log('github-oauth status refused: ' + u.inspect(gh));
+        return res.send({});
+      }
+      debug('/status ok');
+      gh.statusCnt++;  // only serve back once
+      res.send(gh.auth);
+    });
+
+  })
 
 
   // get access token from github
