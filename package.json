@@ -1,12 +1,12 @@
 {
   "name": "pub-pkg-github-oauth",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "pub-server style plugin for github oauth",
   "main": "github-oauth.js",
   "dependencies": {
     "debug": "^2.2.0",
     "ms": "^0.7.1",
-    "pub-util": "^1.5.1",
+    "pub-util": "^2.0.0",
     "request": "^2.58.0"
   },
   "devDependencies": {
