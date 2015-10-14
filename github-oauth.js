@@ -8,6 +8,7 @@ var debug   = require('debug')('pub:github');
 var qs      = require('querystring');
 var ms      = require('ms');
 var u       = require('pub-util');
+var inspect = require('util').inspect;
 
 module.exports = function githubOAuth(server) {
 
@@ -84,7 +85,7 @@ module.exports = function githubOAuth(server) {
       var gh = session && session.github;
       if (!gh || gh.statusCnt || gh.ua !== req.get('user-agent') || !gh.auth ||
        (opts.expire && (Date.now() - gh.ts > ms(opts.expire)))) {
-        log('github-oauth status refused: ' + u.inspect(gh));
+        log('github-oauth status refused: ' + inspect(gh));
         return res.send({});
       }
       debug('/status ok');

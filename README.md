@@ -28,8 +28,8 @@ require('pub-pkg-github-oauth')(server);
 - `server.opts.github.expire` : ms for browser to fetch token
 
 
-## Github credentials
-Github developer application credentials must be exported in the following environment variables.
+## GitHub credentials
+GitHub developer application credentials must be exported in the following environment variables.
 
 ```sh
 export GHID={github client ID}
