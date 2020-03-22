@@ -1,5 +1,7 @@
 # pub-pkg-github-oauth
 
+> NOTE: this package is no longer being maintained
+
 This module provides a [pub-server](https://github.com/jldec/pub-server) style plugin for github oauth.
 
 It is used by [pub-gatekeeper](https://github.com/jldec/pub-gatekeeper) to mediate oauth access, allowing static sites hosted on github pages to be edited from the browser.
